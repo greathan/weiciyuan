@@ -10,7 +10,9 @@ import android.widget.AdapterView;
 import org.qii.weiciyuan.R;
 import org.qii.weiciyuan.bean.DMUserListBean;
 import org.qii.weiciyuan.dao.dm.DMDao;
+import org.qii.weiciyuan.support.database.DMDBTask;
 import org.qii.weiciyuan.support.error.WeiboException;
+import org.qii.weiciyuan.support.lib.MyAsyncTask;
 import org.qii.weiciyuan.support.utils.GlobalContext;
 import org.qii.weiciyuan.ui.adapter.DMUserListAdapter;
 import org.qii.weiciyuan.ui.basefragment.AbstractTimeLineFragment;
@@ -26,15 +28,18 @@ public class DMUserListFragment extends AbstractTimeLineFragment<DMUserListBean>
 
     private DMUserListBean bean = new DMUserListBean();
 
-     @Override
-     public DMUserListBean getList() {
-         return bean;
-     }
+    private DBCacheTask dbTask;
+
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        bean = new DMUserListBean();
+    public DMUserListBean getList() {
+        return bean;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("bean", bean);
     }
 
     @Override
@@ -42,7 +47,17 @@ public class DMUserListFragment extends AbstractTimeLineFragment<DMUserListBean>
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true);
-        pullToRefreshListView.startRefreshNow();
+
+        if (savedInstanceState != null) {
+            bean.addNewData((DMUserListBean) savedInstanceState.getSerializable("bean"));
+            getAdapter().notifyDataSetChanged();
+        } else {
+            if (dbTask == null || dbTask.getStatus() == MyAsyncTask.Status.FINISHED) {
+                dbTask = new DBCacheTask();
+                dbTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
+            }
+
+        }
     }
 
     @Override
@@ -87,39 +102,76 @@ public class DMUserListFragment extends AbstractTimeLineFragment<DMUserListBean>
         getListView().setAdapter(timeLineAdapter);
     }
 
-    protected void clearAndReplaceValue(DMUserListBean value) {
-        bean.getItemList().clear();
-        bean.getItemList().addAll(value.getItemList());
-        bean.setTotal_number(value.getTotal_number());
-    }
+    private class DBCacheTask extends MyAsyncTask<Void, DMUserListBean, DMUserListBean> {
 
-    @Override
-    protected void newMsgOnPostExecute(DMUserListBean newValue) {
-        if (newValue != null && getActivity() != null) {
-            if (newValue.getSize() == 0) {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            getPullToRefreshListView().setVisibility(View.INVISIBLE);
+        }
 
-            } else if (newValue.getSize() > 0) {
-                clearAndReplaceValue(newValue);
-                timeLineAdapter.notifyDataSetChanged();
-                getListView().setSelectionAfterHeaderView();
+        @Override
+        protected DMUserListBean doInBackground(Void... params) {
+            return DMDBTask.get(GlobalContext.getInstance().getCurrentAccountId());
+        }
 
+        @Override
+        protected void onPostExecute(DMUserListBean result) {
+            super.onPostExecute(result);
+            if (result != null)
+                getList().addNewData(result);
+            getPullToRefreshListView().setVisibility(View.VISIBLE);
+            getAdapter().notifyDataSetChanged();
+            refreshLayout(getList());
+
+            if (getList().getSize() == 0) {
+                getPullToRefreshListView().startRefreshNow();
             }
         }
     }
 
     @Override
-    protected void oldMsgOnPostExecute(DMUserListBean newValue) {
+    protected void newMsgOnPostExecute(DMUserListBean newValue) {
+        if (newValue != null && newValue.getSize() > 0 && getActivity() != null) {
+            getList().addNewData(newValue);
+            getAdapter().notifyDataSetChanged();
+            getListView().setSelectionAfterHeaderView();
+        }
 
+    }
+
+    @Override
+    protected void oldMsgOnPostExecute(DMUserListBean newValue) {
+        if (newValue != null && newValue.getSize() > 0 && getActivity() != null) {
+            getList().addOldData(newValue);
+            getAdapter().notifyDataSetChanged();
+        }
     }
 
     @Override
     protected DMUserListBean getDoInBackgroundNewData() throws WeiboException {
-        return new DMDao(GlobalContext.getInstance().getSpecialToken()).getUserList();
+        DMDao dao = new DMDao(GlobalContext.getInstance().getSpecialToken());
+        dao.setCursor(String.valueOf(0));
+        DMUserListBean result = dao.getUserList();
+        if (result != null) {
+            DMDBTask.add(result, GlobalContext.getInstance().getCurrentAccountId());
+        }
+        return result;
     }
 
     @Override
     protected DMUserListBean getDoInBackgroundOldData() throws WeiboException {
-        return null;
+
+        if (getList().getSize() > 0 && Integer.valueOf(getList().getNext_cursor()) == 0) {
+            return null;
+        }
+
+        DMDao dao = new DMDao(GlobalContext.getInstance().getSpecialToken());
+        if (getList().getSize() > 0) {
+            dao.setCursor(String.valueOf(getList().getNext_cursor()));
+        }
+
+        return dao.getUserList();
     }
 
     @Override

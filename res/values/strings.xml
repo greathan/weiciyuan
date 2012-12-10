@@ -14,6 +14,12 @@
     <string name="only_oauth_three_months">每隔3个月得重新授权一次</string>
     <string name="oauthing">授权中</string>
 
+
+    <!--tip dialog-->
+    <string name="tip_dialog_title">提示</string>
+    <string name="tip_dialog_content">1. 搜索、私信、个人资料编辑都没接口做\n2. 受新浪微博政策限制，帐号隔3个月就会过期，需要重新登录\n3.登录是在新浪网站上进行的，登录不了不关我的事\n4.觉得不爽就老老实实用官方或者Weico
+    </string>
+
     <!--emotions-->
     <string name="weibo_emotions">微博表情</string>
     <string name="download_emotions">下载表情</string>
@@ -259,6 +265,7 @@
     <string name="disable_download_pic">禁止下载图片</string>
     <string name="disable_download_pic_summary">改进的无图模式</string>
     <string name="close_comment_repost_list_avatar">关闭评论/转发列表的头像</string>
+    <string name="comment_repost_list_avatar">评论/转发列表的头像</string>
     <string name="show_big_avatar">高清头像</string>
     <string name="show_big_avatar_summary">大屏幕手机推荐开高清</string>
     <string name="show_big_pic">列表显示大图</string>
@@ -281,7 +288,7 @@
     <string name="notification_style_version">Jelly Bean 通知栏</string>
     <string name="notification_style">通知栏扩展样式</string>
     <string name="vibrate">振动</string>
-    <string name="led">LED 灯</string>
+    <string name="led">呼吸灯</string>
     <string name="ringtone">铃声</string>
     <string name="silent">静音</string>
     <string name="disable_notification_at_night">深夜勿扰</string>
@@ -299,9 +306,7 @@
     <string name="only_timeline_font">只影响列表字体大小</string>
     <string name="upload_pic_quality">上传图片质量</string>
     <string name="advanced">高级</string>
-    <string name="download_emotions_summary">从官方几千张表情中下载最常用的80来张。因为列表滚动优化工作涉及了这部分数据的缓存，所以这里你需要退出应用重进才能生效</string>
     <string name="filter">首页过滤</string>
-    <string name="filter_summary">消灭脑残</string>
     <string name="data_control">流量控制</string>
     <string name="have_selected">已经选择了%s项</string>
     <string name="other">其它</string>
@@ -345,6 +350,4 @@
     <string name="askdeletemessage">永久删除这条消息?</string>
 
 
-    <!--other-->
-    <string name="deleted_by_sina_weibo">如果发现有数量对不上，那就是被新浪微博小秘书和谐了……</string>
 </resources>

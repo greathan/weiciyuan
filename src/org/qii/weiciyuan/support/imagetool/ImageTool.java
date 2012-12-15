@@ -24,20 +24,30 @@ public class ImageTool {
 
     public static Bitmap getThumbnailPictureWithRoundedCorner(String url) {
 
-
         String absoluteFilePath = FileManager.getFilePathFromUrl(url, FileLocationMethod.picture_thumbnail);
 
         Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath);
 
         if (bitmap != null) {
-            return ImageEdit.getRoundedCornerBitmap(bitmap);
+            Bitmap roundedCornerBitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
+            if (roundedCornerBitmap != bitmap) {
+                bitmap.recycle();
+                bitmap = roundedCornerBitmap;
+
+            }
         } else if (SettingUtility.isEnablePic()) {
             getBitmapFromNetWork(url, absoluteFilePath, null);
             bitmap = BitmapFactory.decodeFile(absoluteFilePath);
-            if (bitmap != null)
-                return ImageEdit.getRoundedCornerBitmap(bitmap);
+            if (bitmap != null) {
+                Bitmap roundedCornerBitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
+                if (roundedCornerBitmap != bitmap) {
+                    bitmap.recycle();
+                    bitmap = roundedCornerBitmap;
+
+                }
+            }
         }
-        return null;
+        return bitmap;
     }
 
     /**
@@ -100,10 +110,7 @@ public class ImageTool {
 
         if (cutWidth > 0 && cutHeight > 0) {
             Bitmap region = Bitmap.createBitmap(bitmap, 0, 0, cutWidth, cutHeight);
-//            Bitmap anotherValue = ImageEdit.getRoundedCornerBitmap(region);
-//            bitmap.recycle();
-//            region.recycle();
-//            return anotherValue;
+
 
             Bitmap scale = null;
             if (region.getHeight() < reqHeight && region.getWidth() < reqWidth) {
@@ -221,23 +228,22 @@ public class ImageTool {
             try {
                 BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(absoluteFilePath, false);
                 if (decoder != null) {
-                    Bitmap region = decoder.decodeRegion(new Rect(startX, 0, startX + cutWidth, cutHeight), null);
-                    Bitmap scale = null;
-                    if (region.getHeight() < reqHeight && region.getWidth() < reqWidth) {
-                        scale = Bitmap.createScaledBitmap(region, reqWidth, reqHeight, true);
+                    Bitmap bitmap = decoder.decodeRegion(new Rect(startX, 0, startX + cutWidth, cutHeight), null);
+                    if (bitmap.getHeight() < reqHeight && bitmap.getWidth() < reqWidth) {
+                        Bitmap scale = Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, true);
+                        if (scale != bitmap) {
+                            bitmap.recycle();
+                            bitmap = scale;
+                        }
                     }
-                    if (scale == null) {
-                        Bitmap anotherValue = ImageEdit.getRoundedCornerBitmap(region);
-                        region.recycle();
+                    if (bitmap != null) {
+                        Bitmap roundedCornerBitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
+                        if (roundedCornerBitmap != bitmap) {
+                            bitmap.recycle();
+                            bitmap = roundedCornerBitmap;
+                        }
 
-                        return anotherValue;
-//                        return region;
-                    } else {
-                        Bitmap anotherValue = ImageEdit.getRoundedCornerBitmap(scale);
-                        region.recycle();
-                        scale.recycle();
-                        return anotherValue;
-//                        return scale;
+                        return bitmap;
                     }
                 }
             } catch (IOException ignored) {
@@ -251,29 +257,6 @@ public class ImageTool {
 
     }
 
-    public static Bitmap getNotificationAvatar(String url, int reqWidth, int reqHeight) {
-
-
-        String absoluteFilePath = FileManager.getFilePathFromUrl(url, FileLocationMethod.avatar_large);
-        absoluteFilePath = absoluteFilePath + ".jpg";
-
-        Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath);
-
-        if (bitmap == null) {
-            getBitmapFromNetWork(url, absoluteFilePath, null);
-            bitmap = BitmapFactory.decodeFile(absoluteFilePath);
-        }
-
-        if (bitmap != null) {
-            bitmap = Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, true);
-        }
-
-        if (bitmap != null) {
-            bitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
-        }
-
-        return bitmap;
-    }
 
     public static Bitmap getBigAvatarWithRoundedCorner(String url) {
 
@@ -298,48 +281,6 @@ public class ImageTool {
         return bitmap;
     }
 
-
-    public static Bitmap getTimeLineBigAvatarWithRoundedCorner(String url, int reqWidth, int reqHeight) {
-
-        if (!FileManager.isExternalStorageMounted()) {
-            return null;
-        }
-
-        String absoluteFilePath = FileManager.getFilePathFromUrl(url, FileLocationMethod.avatar_large);
-        absoluteFilePath = absoluteFilePath + ".jpg";
-
-        boolean fileExist = new File(absoluteFilePath).exists();
-
-        if (!fileExist && !SettingUtility.isEnablePic()) {
-            return null;
-        }
-
-        if (!fileExist) {
-            boolean result = getBitmapFromNetWork(url, absoluteFilePath, null);
-            if (!result)
-                return null;
-        }
-
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(absoluteFilePath, options);
-
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        options.inJustDecodeBounds = false;
-        options.inPurgeable = true;
-        options.inInputShareable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath, options);
-
-        if (bitmap != null) {
-            Bitmap roundBitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
-            bitmap.recycle();
-            return roundBitmap;
-        }
-
-        return bitmap;
-    }
 
     public static Bitmap getSmallAvatarWithRoundedCorner(String url) {
 
@@ -373,39 +314,60 @@ public class ImageTool {
         return null;
     }
 
-    public static Bitmap getSmallAvatarWithRoundedCorner(String url, int reqWidth, int reqHeight) {
+
+    public static Bitmap getRoundedCornerPic(String url, int reqWidth, int reqHeight, FileLocationMethod method) {
 
         if (!FileManager.isExternalStorageMounted()) {
             return null;
         }
 
-        String absoluteFilePath = FileManager.getFilePathFromUrl(url, FileLocationMethod.avatar_small);
+        String absoluteFilePath = FileManager.getFilePathFromUrl(url, method);
         absoluteFilePath = absoluteFilePath + ".jpg";
 
-        Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath);
+        boolean fileExist = new File(absoluteFilePath).exists();
 
-        if (bitmap == null && !SettingUtility.isEnablePic()) {
+        if (!fileExist && !SettingUtility.isEnablePic()) {
             return null;
         }
 
-        if (bitmap == null) {
+        if (!fileExist) {
             boolean result = getBitmapFromNetWork(url, absoluteFilePath, null);
-            if (result)
-                bitmap = BitmapFactory.decodeFile(absoluteFilePath);
+            if (!result)
+                return null;
         }
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(absoluteFilePath, options);
+
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        options.inJustDecodeBounds = false;
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath, options);
 
         if (bitmap != null) {
             if (bitmap.getHeight() < reqHeight || bitmap.getWidth() < reqWidth) {
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, true);
+
+                if (scaledBitmap != bitmap) {
+                    bitmap.recycle();
+                    bitmap = scaledBitmap;
+                }
+
                 Bitmap roundedBitmap = ImageEdit.getRoundedCornerBitmap(scaledBitmap);
-                bitmap.recycle();
-                scaledBitmap.recycle();
-                return roundedBitmap;
+                if (roundedBitmap != bitmap) {
+                    bitmap.recycle();
+                    bitmap = roundedBitmap;
+                }
+                return bitmap;
             }
         }
 
-        return null;
+        return bitmap;
     }
+
 
     public static Bitmap getMiddlePictureInBrowserMSGActivity(String url, FileDownloaderHttpHelper.DownloadListener downloadListener) {
 
@@ -434,7 +396,7 @@ public class ImageTool {
     }
 
 
-    public static String getLargePictureWithoutRoundedCorner(String url, FileDownloaderHttpHelper.DownloadListener downloadListener,FileLocationMethod fileLocationMethod) {
+    public static String getLargePictureWithoutRoundedCorner(String url, FileDownloaderHttpHelper.DownloadListener downloadListener, FileLocationMethod fileLocationMethod) {
 
 
         String absoluteFilePath = FileManager.getFilePathFromUrl(url, fileLocationMethod);
@@ -452,32 +414,6 @@ public class ImageTool {
                 return absoluteFilePath;
             } else {
                 return "about:blank";
-            }
-
-
-        }
-
-    }
-
-
-    public static String getMiddlePictureWithoutRoundedCorner(String url, FileDownloaderHttpHelper.DownloadListener downloadListener) {
-
-
-        String absoluteFilePath = FileManager.getFilePathFromUrl(url, FileLocationMethod.picture_bmiddle);
-
-        File file = new File(absoluteFilePath);
-
-        if (file.exists()) {
-            return absoluteFilePath;
-
-        } else {
-            getBitmapFromNetWork(url, absoluteFilePath, downloadListener);
-
-            file = new File(absoluteFilePath);
-            if (file.exists()) {
-                return absoluteFilePath;
-            } else {
-                return "";
             }
 
 
@@ -504,15 +440,7 @@ public class ImageTool {
 
 
     private static boolean getBitmapFromNetWork(String url, String path, FileDownloaderHttpHelper.DownloadListener downloadListener) {
-
-
-//        for (int i = 0; i < AppConfig.RETRY_TIMES; i++) {
-            boolean result = HttpUtility.getInstance().executeDownloadTask(url, path, downloadListener);
-            if (result)
-                return true;
-//        }
-
-        return false;
+        return HttpUtility.getInstance().executeDownloadTask(url, path, downloadListener);
     }
 
 

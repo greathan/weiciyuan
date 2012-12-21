@@ -356,7 +356,7 @@ public class ImageTool {
                     bitmap = scaledBitmap;
                 }
 
-                Bitmap roundedBitmap = ImageEdit.getRoundedCornerBitmap(scaledBitmap);
+                Bitmap roundedBitmap = ImageEdit.getRoundedCornerBitmap(bitmap);
                 if (roundedBitmap != bitmap) {
                     bitmap.recycle();
                     bitmap = roundedBitmap;
@@ -388,7 +388,7 @@ public class ImageTool {
         if (file.exists()) {
             DisplayMetrics displayMetrics = GlobalContext.getInstance().getDisplayMetrics();
 
-            Bitmap bitmap = decodeBitmapFromSDCard(absoluteFilePath, displayMetrics.widthPixels, displayMetrics.heightPixels);
+            Bitmap bitmap = decodeBitmapFromSDCard(absoluteFilePath, displayMetrics.widthPixels, 900);
             return bitmap;
 
         }
@@ -422,8 +422,8 @@ public class ImageTool {
     }
 
 
-    private static Bitmap decodeBitmapFromSDCard(String path,
-                                                 int reqWidth, int reqHeight) {
+    public static Bitmap decodeBitmapFromSDCard(String path,
+                                                int reqWidth, int reqHeight) {
 
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -440,7 +440,12 @@ public class ImageTool {
 
 
     private static boolean getBitmapFromNetWork(String url, String path, FileDownloaderHttpHelper.DownloadListener downloadListener) {
-        return HttpUtility.getInstance().executeDownloadTask(url, path, downloadListener);
+        for (int i = 0; i < 3; i++) {
+            if (HttpUtility.getInstance().executeDownloadTask(url, path, downloadListener)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -454,9 +459,16 @@ public class ImageTool {
         if (height > reqHeight || width > reqWidth) {
             if (height > reqHeight && reqHeight != 0) {
                 inSampleSize = Math.round((float) height / (float) reqHeight);
-            } else if (width > reqWidth && reqWidth != 0) {
-                inSampleSize = Math.round((float) width / (float) reqWidth);
             }
+
+            int tmp = 0;
+
+            if (width > reqWidth && reqWidth != 0) {
+                tmp = Math.round((float) width / (float) reqWidth);
+            }
+
+            if (tmp > inSampleSize)
+                inSampleSize = tmp;
 
         }
         return inSampleSize;

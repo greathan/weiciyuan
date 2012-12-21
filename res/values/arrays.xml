@@ -35,6 +35,12 @@
         <item>压缩到25%</item>
         <item>自动</item>
     </string-array>
+    <string-array name="upload_pic_quality_hack_bug" formatted="false">
+        <item>高清不压缩</item>
+        <item>压缩到50%%</item>
+        <item>压缩到25%%</item>
+        <item>自动</item>
+    </string-array>
     <string-array name="upload_pic_quality_value">
         <item>1</item>
         <item>2</item>
@@ -76,11 +82,23 @@
         <item>2</item>
     </string-array>
     <string-array name="comment_repost_list_avatar_mode">
-        <item>自动</item>
+        <item>打开</item>
         <item>关闭</item>
+        <item>自动</item>
     </string-array>
     <string-array name="comment_repost_list_avatar_value">
         <item>1</item>
         <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="msg_count_title">
+        <item>25条</item>
+        <item>50条</item>
+        <item>自动</item>
+    </string-array>
+    <string-array name="msg_count_title_value">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 </resources>

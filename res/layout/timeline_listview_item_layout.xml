@@ -6,7 +6,7 @@
                 android:padding="8dp"
                 android:id="@+id/listview_root">
 
-    <org.qii.weiciyuan.support.lib.PerformanceImageView
+    <org.qii.weiciyuan.support.lib.TimeLineAvatarImageView
         android:id="@+id/avatar"
         android:layout_width="@dimen/timeline_avatar_width"
         android:layout_height="@dimen/timeline_avatar_height"
@@ -56,7 +56,7 @@
         android:textStyle="bold"/>
 
 
-    <TextView
+    <org.qii.weiciyuan.support.lib.TimeTextView
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
             android:layout_width="fill_parent"
             android:gravity="center">
 
-            <ImageView
+            <org.qii.weiciyuan.support.lib.TimeLineImageView
                 android:id="@+id/content_pic"
                 android:layout_width="@dimen/timeline_pic_thumbnail_width"
                 android:layout_height="@dimen/timeline_pic_thumbnail_height"
@@ -97,7 +97,7 @@
                 android:clickable="true"
                 android:padding="2dp"
                 android:scaleType="fitCenter"
-                android:background="?android:selectableItemBackground"/>
+               />
         </LinearLayout>
 
         <LinearLayout
@@ -126,7 +126,7 @@
                 android:layout_marginTop="5dp"
                 android:gravity="center">
 
-                <ImageView
+                <org.qii.weiciyuan.support.lib.TimeLineImageView
                     android:id="@+id/repost_content_pic"
                     android:layout_width="@dimen/timeline_pic_thumbnail_width"
                     android:layout_height="@dimen/timeline_pic_thumbnail_height"
@@ -134,7 +134,7 @@
                     android:clickable="true"
                     android:padding="2dp"
                     android:scaleType="fitCenter"
-                    android:background="?android:selectableItemBackground"/>
+                  />
             </LinearLayout>
         </LinearLayout>
 

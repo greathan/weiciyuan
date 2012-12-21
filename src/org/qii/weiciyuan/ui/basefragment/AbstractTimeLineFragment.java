@@ -175,7 +175,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends Fragm
                 getListView().clearChoices();
                 if (position - 1 < getList().getSize() && position - 1 >= 0) {
                     int index = position - 1;
-                    Object msg = getList().getItemList().get(index);
+                    ItemBean msg = getList().getItem(index);
 
                     if (msg != null) {
                         listViewItemClick(parent, view, index, id);
@@ -266,7 +266,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends Fragm
 
             newTask = new TimeLineGetNewMsgListTask();
             newTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
-            ((AbstractAppActivity) getActivity()).getCommander().totalStopLoadPicture();
+            ((AbstractAppActivity) getActivity()).getBitmapDownloader().totalStopLoadPicture();
 
         }
 
@@ -287,7 +287,7 @@ public abstract class AbstractTimeLineFragment<T extends ListBean> extends Fragm
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        commander = ((AbstractAppActivity) getActivity()).getCommander();
+        commander = ((AbstractAppActivity) getActivity()).getBitmapDownloader();
 
     }
 

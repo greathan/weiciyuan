@@ -123,7 +123,8 @@ public class AccountActivity extends AbstractAppActivity {
                 addAccount();
                 break;
             case R.id.menu_hack_login:
-                startActivity(new Intent(this, BlackMagicActivity.class));
+                Intent intent = new Intent(this, BlackMagicActivity.class);
+                startActivityForResult(intent, ADD_ACCOUNT_REQUEST_CODE);
                 break;
         }
         return true;
@@ -248,7 +249,10 @@ public class AccountActivity extends AbstractAppActivity {
             }
 
             TextView textView = (TextView) mView.findViewById(R.id.account_name);
-            textView.setText(accountList.get(i).getUsernick());
+            if (accountList.get(i).getInfo() != null)
+                textView.setText(accountList.get(i).getInfo().getScreen_name());
+            else
+                textView.setText(accountList.get(i).getUsernick());
             ImageView imageView = (ImageView) mView.findViewById(R.id.imageView_avatar);
 
             if (!TextUtils.isEmpty(accountList.get(i).getAvatar_url())) {

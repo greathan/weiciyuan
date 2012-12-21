@@ -11,7 +11,9 @@ import org.qii.weiciyuan.support.error.WeiboException;
 import org.qii.weiciyuan.support.http.HttpMethod;
 import org.qii.weiciyuan.support.http.HttpUtility;
 import org.qii.weiciyuan.support.settinghelper.SettingUtility;
-import org.qii.weiciyuan.support.utils.*;
+import org.qii.weiciyuan.support.utils.AppLogger;
+import org.qii.weiciyuan.support.utils.ListViewTool;
+import org.qii.weiciyuan.support.utils.TimeTool;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,8 +75,10 @@ public class MainFriendsTimeLineDao {
                 MessageBean msg = iterator.next();
                 if (msg.getUser() == null) {
                     iterator.remove();
+                    value.removedCountPlus();
                 } else if (SettingUtility.isEnableFilter() && ListViewTool.haveFilterWord(msg, filterWordList)) {
                     iterator.remove();
+                    value.removedCountPlus();
                 } else {
                     msg.getListViewSpannableString();
                     TimeTool.dealMills(msg);
@@ -100,7 +104,7 @@ public class MainFriendsTimeLineDao {
     public MainFriendsTimeLineDao(String access_token) {
 
         this.access_token = access_token;
-        this.count = String.valueOf(AppConfig.DEFAULT_MSG_NUMBERS);
+        this.count = SettingUtility.getMsgCount();
     }
 
     public MainFriendsTimeLineDao setSince_id(String since_id) {

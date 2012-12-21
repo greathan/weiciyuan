@@ -16,6 +16,8 @@ import android.widget.ListView;
 import org.qii.weiciyuan.support.lib.MyAsyncTask;
 import org.qii.weiciyuan.support.settinghelper.SettingUtility;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,6 +74,15 @@ public class Utility {
             }
         }
         return params;
+    }
+
+    public static void closeSilently(Closeable closeable) {
+        if (closeable != null)
+            try {
+                closeable.close();
+            } catch (IOException ignored) {
+
+            }
     }
 
     /**
@@ -159,6 +170,16 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    public static int getNetType(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return networkInfo.getType();
+        }
+        return -1;
     }
 
     public static boolean isGprs(Context context) {

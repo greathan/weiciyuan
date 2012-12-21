@@ -9,7 +9,7 @@ import org.qii.weiciyuan.dao.unread.ClearUnreadDao;
 import org.qii.weiciyuan.support.error.WeiboException;
 import org.qii.weiciyuan.support.http.HttpMethod;
 import org.qii.weiciyuan.support.http.HttpUtility;
-import org.qii.weiciyuan.support.utils.AppConfig;
+import org.qii.weiciyuan.support.settinghelper.SettingUtility;
 import org.qii.weiciyuan.support.utils.AppLogger;
 import org.qii.weiciyuan.support.utils.TimeTool;
 
@@ -22,7 +22,7 @@ import java.util.Map;
  * User: qii
  * Date: 12-7-29
  */
-public class MainCommentsTimeLineDao {
+public class MainCommentsTimeLineDao implements ICommentsTimeLineDao {
 
 
     public void setSince_id(String since_id) {
@@ -57,7 +57,7 @@ public class MainCommentsTimeLineDao {
     public MainCommentsTimeLineDao(String access_token) {
 
         this.access_token = access_token;
-        this.count = String.valueOf(AppConfig.DEFAULT_MSG_NUMBERS);
+        this.count = SettingUtility.getMsgCount();
     }
 
     protected String getUrl() {

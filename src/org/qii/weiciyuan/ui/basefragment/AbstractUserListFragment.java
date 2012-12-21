@@ -17,7 +17,6 @@ import org.qii.weiciyuan.support.utils.GlobalContext;
 import org.qii.weiciyuan.support.utils.Utility;
 import org.qii.weiciyuan.ui.adapter.UserListAdapter;
 import org.qii.weiciyuan.ui.interfaces.AbstractAppActivity;
-import org.qii.weiciyuan.ui.interfaces.ICommander;
 import org.qii.weiciyuan.ui.userinfo.UserInfoActivity;
 
 /**
@@ -27,11 +26,10 @@ import org.qii.weiciyuan.ui.userinfo.UserInfoActivity;
 public abstract class AbstractUserListFragment extends Fragment {
 
     protected View footerView;
-    protected ICommander commander;
     protected PullToRefreshListView pullToRefreshListView;
     protected TextView empty;
     protected ProgressBar progressBar;
-    protected UserListAdapter timeLineAdapter;
+    private UserListAdapter userListAdapter;
     protected UserListBean bean = new UserListBean();
 
     private UserListGetNewDataTask newTask;
@@ -48,7 +46,7 @@ public abstract class AbstractUserListFragment extends Fragment {
     }
 
     protected UserListAdapter getAdapter() {
-        return timeLineAdapter;
+        return userListAdapter;
     }
 
     protected void clearAndReplaceValue(UserListBean value) {
@@ -133,8 +131,8 @@ public abstract class AbstractUserListFragment extends Fragment {
         dismissFooterView();
 
 
-        timeLineAdapter = new UserListAdapter(AbstractUserListFragment.this, ((AbstractAppActivity) getActivity()).getCommander(), bean.getUsers(), getListView());
-        pullToRefreshListView.setAdapter(timeLineAdapter);
+        userListAdapter = new UserListAdapter(AbstractUserListFragment.this, ((AbstractAppActivity) getActivity()).getBitmapDownloader(), bean.getUsers(), getListView());
+        pullToRefreshListView.setAdapter(userListAdapter);
 
         pullToRefreshListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -251,7 +249,7 @@ public abstract class AbstractUserListFragment extends Fragment {
     public void refresh() {
         if (newTask == null || newTask.getStatus() == MyAsyncTask.Status.FINISHED) {
 
-            ((AbstractAppActivity) getActivity()).getCommander().totalStopLoadPicture();
+            ((AbstractAppActivity) getActivity()).getBitmapDownloader().totalStopLoadPicture();
 
             newTask = new UserListGetNewDataTask();
             newTask.executeOnExecutor(MyAsyncTask.THREAD_POOL_EXECUTOR);
@@ -271,7 +269,6 @@ public abstract class AbstractUserListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case R.id.refresh:
                 pullToRefreshListView.startRefreshNow();
                 break;

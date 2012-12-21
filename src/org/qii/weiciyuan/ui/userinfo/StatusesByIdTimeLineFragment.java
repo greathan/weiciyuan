@@ -14,7 +14,6 @@ import org.qii.weiciyuan.dao.user.StatusesTimeLineDao;
 import org.qii.weiciyuan.support.error.WeiboException;
 import org.qii.weiciyuan.ui.basefragment.AbstractMessageTimeLineFragment;
 import org.qii.weiciyuan.ui.browser.BrowserWeiboMsgActivity;
-import org.qii.weiciyuan.ui.interfaces.AbstractAppActivity;
 
 /**
  * User: Jiang Qi
@@ -61,8 +60,6 @@ public class StatusesByIdTimeLineFragment extends AbstractMessageTimeLineFragmen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
 
-        commander = ((AbstractAppActivity) getActivity()).getCommander();
-
         if (savedInstanceState != null) {
             clearAndReplaceValue((MessageListBean) savedInstanceState.getSerializable("bean"));
             userBean = (UserBean) savedInstanceState.getSerializable("userBean");
@@ -86,38 +83,11 @@ public class StatusesByIdTimeLineFragment extends AbstractMessageTimeLineFragmen
 
 
     @Override
-    protected void newMsgOnPostExecute(MessageListBean newValue) {
-        if (getActivity() != null && newValue.getSize() > 0) {
-            getList().addNewData(newValue);
-            getAdapter().notifyDataSetChanged();
-            getListView().setSelectionAfterHeaderView();
-
-
-        }
-
-        afterGetNewMsg();
-
-    }
-
-    @Override
-    protected void oldMsgOnPostExecute(MessageListBean newValue) {
-        if (newValue != null && newValue.getSize() > 1) {
-            getList().addOldData(newValue);
-
-        } else {
-            Toast.makeText(getActivity(), getString(R.string.older_message_empty), Toast.LENGTH_SHORT).show();
-
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
             case R.id.menu_refresh:
-                pullToRefreshListView.startRefreshNow();
-                refresh();
-
+                getPullToRefreshListView().startRefreshNow();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -161,14 +131,30 @@ public class StatusesByIdTimeLineFragment extends AbstractMessageTimeLineFragmen
         return result;
     }
 
+
     @Override
-    protected void afterGetNewMsg() {
-        getActivity().invalidateOptionsMenu();
+    protected void newMsgOnPostExecute(MessageListBean newValue) {
+        if (getActivity() != null && newValue.getSize() > 0) {
+            getList().addNewData(newValue);
+            getAdapter().notifyDataSetChanged();
+            getListView().setSelectionAfterHeaderView();
+            getActivity().invalidateOptionsMenu();
+
+        }
+
+
     }
 
     @Override
-    protected void afterGetOldMsg() {
-        getActivity().invalidateOptionsMenu();
+    protected void oldMsgOnPostExecute(MessageListBean newValue) {
+        if (newValue != null && newValue.getSize() > 1) {
+            getList().addOldData(newValue);
+            getActivity().invalidateOptionsMenu();
+
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.older_message_empty), Toast.LENGTH_SHORT).show();
+
+        }
     }
 
 }
